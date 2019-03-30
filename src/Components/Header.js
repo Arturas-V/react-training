@@ -1,15 +1,14 @@
 import React from "react";
 
-function Header() {
+class Header extends React.Component {
 
-  return (
-    <header>
-      <p>This is headrer</p>
-    </header>
-  )
-
-  
-
+	render() {		
+		return(
+			<header>
+				<h2>CRYPTO</h2>
+			</header>
+		)		
+	};
 }
 
 export default Header;

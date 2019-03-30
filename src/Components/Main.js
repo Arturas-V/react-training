@@ -1,74 +1,85 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { createBrowserHistory } from "history";
+import MarketsGrid from './MarketsGrid.js'
+
 
 class Main extends React.Component {
 
 	constructor(props) {
-		super(props)
+		super(props);
 
-		this.mainNavClickHandler = this.mainNavClickHandler.bind(this)
+		this.marketLinkClickHandler = this.marketLinkClickHandler.bind(this);
+		this.marketDataUpdate = this.marketDataUpdate.bind(this);
 	}
 
-	mainNavClickHandler(e) {
-		const exchange = e.target.attributes.getNamedItem('data-ex').value;
+	/*
+	 * Upon Main component mount let's fetch current market data
+	 */
+	componentWillMount() {
+		this.fetchMarketData(createBrowserHistory().location.pathname);
+	}
 
-	    return fetch('../../data/' + exchange + '.json')
+	/*
+	 * Update market method - settting child element state and then it updates
+	 */
+	marketDataUpdate(data) {
+		this.child.setState({marketData:data});	
+	}
+
+	/*
+	 * Market Link click event handler
+	 */
+	marketLinkClickHandler(e) {
+		this.fetchMarketData(e.target.attributes.getNamedItem('data-exchange').value);
+	}
+
+	/*
+	 * Fetch market data by making rest call to api
+	 */
+	fetchMarketData(url) {
+		return fetch('../../data' + url + '.json')
 		    .then(response => response.json())
 		    .then(responseJson => {
-		      return responseJson;
+		    	this.marketDataUpdate(responseJson);
 		    })
 		    .catch(error => {
 		      console.error(error);
 		    });
 	}
 
+	/*
+	 *  render DOM
+	 */
 	render() {
 		return (
 		    <Router>
-			    <main>    
-			      <ul>
-			        <li>
-			          <Link to="/">All</Link>
-			        </li>
-			        <li>
-			          <Link to="/binance" data-ex="binance" onClick={this.mainNavClickHandler}>Binance</Link>
-			        </li>
-			        <li>
-			          <Link to="/bitfinex" data-ex="bitfinex" onClick={this.mainNavClickHandler}>Bitfinex</Link>
-			        </li>
-			      </ul>
+			    <main>    	
 
-			      <hr />
+			      	<ul className="marketsNavigation">
+				        <li>
+				          <Link to="/binance" data-exchange="/binance" onClick={this.marketLinkClickHandler}>Binance</Link>
+				        </li>
+				        <li>
+				          <Link to="/bitfinex" data-exchange="/bitfinex" onClick={this.marketLinkClickHandler}>Bitfinex</Link>
+				        </li>
+				        <li>
+				          <Link to="/bittrex" data-exchange="/bittrex" onClick={this.marketLinkClickHandler}>Bittrex</Link>
+				        </li>
+			      	</ul>
 
-			      <Route exact path="/" component={Home} />
-			      <Route path="/binance" component={About} />
-			      <Route path="/bitfinex" component={Topics} />
+			      	<hr />
+
+			      	<MarketsGrid onRef={ref => (this.child = ref)}/>
+			      
 			    </main>
 			</Router>
 		)
 	}
 }
 
-
-const Home = () => (
-  
-  <div>
-    <h2>Home</h2>
-  </div>
-);
-
-const About = () => (
-
-  <div>
-    <h2>Binance</h2>
-  </div>
-);
-
-const Topics = () => (
-  <div>
-    <h2>Bitfinex</h2>
-  </div>
-);
-
+// <Route path="/binance" render={this.marketGridRender} />
+// <Route path="/bitfinex" render={this.marketGridRender} />
+// <Route path="/bittrex" render={this.marketGridRender} />	
 
 export default Main;
